@@ -62,11 +62,11 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 ```mermaid
 graph TD
-    H["你（人类）· 最终判断"]
-    CC["Claude Code（大脑）<br/>分析 / 拆解 / 派活 / 审查 / 记决策"]
-    CX["Codex（实现者）<br/>读 brief -> 写 plan -> 实现 -> 跑 check.sh"]
-    M1["codexmcp（无声委托）<br/>一次提交 -> 拿回 JSON，支持续接"]
-    M2["codex-bridge（窗口模式）<br/>弹出终端 TUI，实时可见，可追踪"]
+    H["用户· 最终判断"]
+    CC["Claude Code（大脑）"]
+    CX["Codex（实现者）"]
+    M1["codexmcp（无声委托）"]
+    M2["codex-bridge（窗口模式）"]
 
     H -->|"提出需求 / 最终确认"| CC
     CC -->|"MCP 无声委托"| M1
@@ -301,11 +301,11 @@ claude mcp list   # 应看到 codex 和 codex-bridge 都 √ Connected
 ```mermaid
 graph TD
     A["你提出需求"]
-    B["Claude Code：写 brief（派发前 ponytail 精简审查）"]
-    C["Claude Code：派 Codex（窗口 / 无声）"]
-    D["Codex：读 brief -> 写 plan -> 实现"]
+    B["Claude Code：<br>写 brief（派发前 ponytail 精简审查）"]
+    C["Claude Code：<br>派 Codex（窗口 / 无声）"]
+    D["Codex：<br>读 brief -> 写 plan -> 实现"]
     E{"check.sh 通过？"}
-    F["Claude Code：审查 diff -> 写 review / backlog / decision-log"]
+    F["Claude Code：<br>审查 diff -> 写 review / backlog / decision-log"]
     G{"审查通过？"}
     H["你最终确认 -> 合入"]
 
