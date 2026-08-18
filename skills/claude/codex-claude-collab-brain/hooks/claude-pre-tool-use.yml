@@ -1,0 +1,12 @@
+# .claude/hooks/pre-tool-use.yml
+# Claude Code hook：写入前强制运行 check.sh（由 codex-claude-collab skill 提供示例）
+
+hooks:
+  - event: pre_tool_use
+    tool: write_file
+    action:
+      type: run_command
+      command: scripts/check.sh
+    condition:
+      # 仅在源代码修改时触发
+      file_pattern: "src/**"

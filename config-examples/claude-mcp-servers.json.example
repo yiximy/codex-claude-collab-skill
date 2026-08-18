@@ -1,0 +1,21 @@
+// ~/.claude.json 中 mcpServers 片段示例（合并进该对象）
+// 注意：Windows 上不要用 `claude mcp add <name> -- ...`（参数会被误解析），直接编辑本文件
+
+"mcpServers": {
+  // 无声委托桥（codexmcp）
+  "codex": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+      "--from", "git+https://github.com/GuDaStudio/codexmcp.git",
+      "--with", "mcp<2",
+      "codexmcp"
+    ]
+  },
+  // 窗口模式桥（codex-bridge，本包修复版）
+  "codex-bridge": {
+    "type": "stdio",
+    "command": "C:\\Users\\你的用户名\\claude-codex-bridge\\.venv\\Scripts\\python.exe",
+    "args": ["C:\\Users\\你的用户名\\claude-codex-bridge\\run.py"]
+  }
+}

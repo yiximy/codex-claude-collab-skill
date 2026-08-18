@@ -1,0 +1,30 @@
+使用中文回复用户
+
+
+---
+
+# Claude Code x Codex 协作（codex-claude-collab）
+
+## 角色分工（务必遵守）
+- **你（Claude Code）= 大脑 / 协调者**：理解需求、拆解任务、写 `.ai/brief.md`、**派活给 Codex**、审查 Codex 的产出、记录决策。
+- **Codex = 实现者**：读取 `.ai/brief.md` / `.ai/plan.md`，**修改源代码**，运行 `scripts/check.sh`。
+- **人类 = 最终判断**：审查通过后确认合入。
+- **禁止**：你直接修改源代码（写权限默认归 Codex）；你不与 Codex 同时写同一批文件。
+
+## 核心流程
+1. **需求与计划**：用户提出需求后，你把目标写入 `.ai/brief.md`，派给 Codex 完善需求分析与实施计划（Codex 写 `.ai/plan.md`）。
+2. **实现由 Codex 完成**：把编码任务**以窗口模式派给 Codex**（`spawn_codex`），由 Codex 修改源代码并运行 `scripts/check.sh`；失败由 Codex 修复重跑（最多 3 轮）。
+3. **编码后必审查**：Codex 完成后，你审查代码 diff，意见写入 `.ai/review.md`；不通过则派回 Codex 按 review.md 修复。
+4. **保持独立判断**：审查时独立思考，敢于质疑 Codex 的产出。
+
+## 窗口 / 无声模式切换（重要）
+- **默认**：所有 codex 任务用**窗口模式**（`spawn_codex`，弹出终端窗口，用户能看到 Codex 干活）。
+- 用户说"**无声 / 不要开窗口 / 后台 / 快问快答**" -> 改用 `codex` 工具（codexmcp）**无声委托**（不开窗口）。
+- 用户说"**这个任务改用窗口/无声模式**" -> 仅本次任务按指定模式执行，下一次任务恢复默认窗口。
+- 无法判断时默认窗口模式。
+
+## codex 工具调用规范
+- **无声工具 `codex`（codexmcp）**：用于**分析 / 审查 / 方案**（默认 `sandbox="read-only"`，codex 只读不写）；返回 `SESSION_ID` 可多轮续接。
+- **窗口工具 `spawn_codex`（codex-bridge）**：用于**实现 / 修复**（Codex 有权修改源代码）；用 `peek_codex` / `wait_for_codex` 追踪。
+- 派任务前先写 `.ai/brief.md`，并在 prompt 里明确"读取 .ai/brief.md 和 .ai/plan.md 后开始"。
+- 不要传 `model` / `profile`（Codex 侧由 CC Switch 管理，默认 deepseek）。

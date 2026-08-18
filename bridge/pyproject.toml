@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "claude-codex-bridge"
+version = "0.1.0"
+description = "MCP server that lets Claude Code dispatch tasks to OpenAI Codex / Google Gemini CLIs. Window mode runs codex detached from the MCP lifecycle so the bridge does not make pid-based liveness guesses."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "uuz495" }]
+keywords = ["mcp", "claude", "codex", "gemini", "ai-orchestration"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+claude-codex-bridge = "ccb.server:main"
+
+[project.urls]
+Homepage = "https://github.com/uuz495/claude-codex-bridge"
+Issues = "https://github.com/uuz495/claude-codex-bridge/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ccb"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

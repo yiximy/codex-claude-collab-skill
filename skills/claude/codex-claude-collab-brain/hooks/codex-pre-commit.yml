@@ -1,0 +1,8 @@
+# .codex/hooks/pre-commit.yml
+# Codex hook：提交前强制运行 check.sh（由 codex-claude-collab skill 提供示例）
+
+hooks:
+  - event: pre_commit
+    action:
+      type: run_command
+      command: scripts/check.sh

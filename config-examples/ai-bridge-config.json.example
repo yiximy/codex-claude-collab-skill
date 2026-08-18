@@ -1,0 +1,14 @@
+// ~/.ai-bridge/config.json 示例（窗口桥配置）
+// codex_model_follow_codex_config = true（默认）：跟随 CC Switch 写入的 ~/.codex/config.toml 顶层 model，
+//   在 CC Switch 里切换模型即可，无需改这里；false 时用下面的 codex_model 固定模型。
+{
+  "codex_model": "deepseek-v4-flash",
+  "codex_model_follow_codex_config": true,
+  "codex_reasoning_effort": "high",
+  "codex_reasoning_summary": "auto",
+  "codex_fast_mode": false,
+  "default_timeout_sec": 1800,
+  "cwd_remaps": [
+    ["D:\\你的中文项目路径", "C:\\codex-workspace"]
+  ]
+}

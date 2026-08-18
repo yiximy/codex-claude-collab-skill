@@ -1,0 +1,23 @@
+# ~/.codex/config.toml 示例（DeepSeek 等 OpenAI 兼容后端）
+# 复制为 ~/.codex/config.toml 后按需修改。
+
+model_provider = "custom"
+model = "deepseek-v4-flash"          # 改成你的模型名（如 deepseek-chat / deepseek-reasoner）
+model_reasoning_effort = "high"
+
+[model_providers.custom]
+name = "deepseek"
+base_url = "https://api.deepseek.com"
+wire_api = "responses"               # 部分服务仅支持 "chat"，按供应商文档调整
+requires_openai_auth = true
+
+# 信任项目目录（避免 TUI 每次询问）
+[projects.'c:\codex-workspace']
+trust_level = "trusted"
+
+# [projects.'h:\你的中文项目路径']
+# trust_level = "trusted"
+
+# 子代理并发（Codex 通过 spawn_agent 调用子代理，如并行调研/审查）
+[agents]
+max_concurrent_threads_per_session = 8
