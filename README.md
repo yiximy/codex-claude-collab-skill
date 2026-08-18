@@ -1,4 +1,4 @@
-# Claude Code × Codex 协作（codex-claude-collab-skill）
+# &#x20;Codex-Claude-collab-skill&#x20;
 
 > 让 **Claude Code 当大脑**（分析需求 / 拆解任务 / 派活 / 审查），**Codex 当实现者**（读简报 / 写方案 / 改代码 / 跑验证），双模型协作完成开发任务；并内置 **ponytail 懒高级开发模式**——先摸清上下文、再决定写什么不写什么，用最少代码实现同等功能，避免重复造轮子。
 
@@ -37,14 +37,14 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 ## 🧩 组件
 
-| 组件 | 说明 |
-|------|------|
-| `skills/claude/codex-claude-collab-brain` | Claude Code 大脑视角 skill（派发前 ponytail 精简审查） |
-| `skills/codex/codex-claude-collab-worker` | Codex 实现者视角 skill（实现时 ponytail 7 步梯子 + 子代理委派） |
-| `skills/*/ponytail*` | ponytail 懒高级开发模式（6 个 skill：`ponytail` / `-review` / `-audit` / `-debt` / `-gain` / `-help`） |
-| `bridge/` | codex-bridge 窗口模式 MCP 桥（含 Windows 参数 / 信任修复） |
-| `install.ps1` | Windows 一键安装脚本（依赖检查 / 桥部署 / MCP 合并 / skills 安装） |
-| `config-examples/` | 各配置文件示例（占位符，不含真实密钥） |
+| 组件                                        | 说明                                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `skills/claude/codex-claude-collab-brain` | Claude Code 大脑视角 skill（派发前 ponytail 精简审查）                                                   |
+| `skills/codex/codex-claude-collab-worker` | Codex 实现者视角 skill（实现时 ponytail 7 步梯子 + 子代理委派）                                               |
+| `skills/*/ponytail*`                      | ponytail 懒高级开发模式（6 个 skill：`ponytail` / `-review` / `-audit` / `-debt` / `-gain` / `-help`） |
+| `bridge/`                                 | codex-bridge 窗口模式 MCP 桥（含 Windows 参数 / 信任修复）                                                |
+| `install.ps1`                             | Windows 一键安装脚本（依赖检查 / 桥部署 / MCP 合并 / skills 安装）                                             |
+| `config-examples/`                        | 各配置文件示例（占位符，不含真实密钥）                                                                         |
 
 ## 🔒 安全说明
 
@@ -56,25 +56,33 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 以下为完整教程：整体架构 → 环境要求 → 一键安装 → 手动安装 → 使用指南 → 常见问题 → 目录说明 → 致谢。
 
----
+***
 
 ## 1. 整体架构
 
-```
-你（人类）：最终判断
-  |
-  +--> Claude Code（大脑）：分析需求 / 拆解任务 / 派活 / 审查 / 记决策（只读，不改源码）
-  |        |
-  |        +-- MCP --> codexmcp（无声委托）--> Codex：读 .ai/brief.md -> 写 plan.md -> 实现 -> 跑 check.sh
-  |        +-- MCP --> codex-bridge（窗口模式）--> Codex：同上，但弹出终端窗口让你实时看到它干活
+```mermaid
+graph TD
+    H["你（人类）· 最终判断"]
+    CC["Claude Code（大脑）<br/>分析 / 拆解 / 派活 / 审查 / 记决策"]
+    CX["Codex（实现者）<br/>读 brief -> 写 plan -> 实现 -> 跑 check.sh"]
+    M1["codexmcp（无声委托）<br/>一次提交 -> 拿回 JSON，支持续接"]
+    M2["codex-bridge（窗口模式）<br/>弹出终端 TUI，实时可见，可追踪"]
+
+    H -->|"提出需求 / 最终确认"| CC
+    CC -->|"MCP 无声委托"| M1
+    CC -->|"MCP 窗口模式"| M2
+    M1 --> CX
+    M2 --> CX
+    CX -->|"返回 diff / 结果"| CC
+    CC -->|"审查通过"| H
 ```
 
 **两个 MCP 桥（可并存，按需选用）：**
 
-| 桥 | 模式 | 特点 | 适用 |
-|----|------|------|------|
-| **codexmcp**（GuDaStudio） | 无声委托 | 一次性提交 -> 等待 -> 拿回 JSON 结果；不开窗口；支持 `SESSION_ID` 多轮续接 | 出方案、审查、生成 diff、短任务 |
-| **codex-bridge**（uuz495，本包含修复版） | 窗口模式 | 弹出真实终端窗口显示 Codex 的 TUI，你能实时看到它干活；Claude 用 `peek_codex`/`wait_for_codex` 追踪 | 实际改代码、跑长任务、想监督 |
+| 桥                               | 模式   | 特点                                                                         | 适用                 |
+| ------------------------------- | ---- | -------------------------------------------------------------------------- | ------------------ |
+| **codexmcp**（GuDaStudio）        | 无声委托 | 一次性提交 -> 等待 -> 拿回 JSON 结果；不开窗口；支持 `SESSION_ID` 多轮续接                        | 出方案、审查、生成 diff、短任务 |
+| **codex-bridge**（uuz495，本包含修复版） | 窗口模式 | 弹出真实终端窗口显示 Codex 的 TUI，你能实时看到它干活；Claude 用 `peek_codex`/`wait_for_codex` 追踪 | 实际改代码、跑长任务、想监督     |
 
 **协作文件约定（每个项目内）：**
 
@@ -91,32 +99,33 @@ project/
     └── decision-log.md# 决策记录
 ```
 
----
-
+***
 
 ### 1.1 ponytail：懒高级开发模式（默认开启）
 
 本包集成了 [ponytail](https://github.com/DietrichGebert/ponytail)（v4.9.0，MIT）——让 AI 表现得像"房间里最懒的高级开发人员"：**最好的代码是没写出来的代码**。
 
 协作流程中的体现：
+
 - **Claude Code（大脑）派发任务前**：先做 ponytail 精简审查——这个功能真的需要写吗（YAGNI）？代码库里已有吗（复用）？标准库/平台/已装依赖能搞定吗？能一行吗？最后才给出最小实现方案，把"复用清单 / 跳过清单 / 最小实现要求"写进 `.ai/brief.md` 再派给 Codex。
 - **Codex（实现者）执行时**：同样遵循 7 步梯子，用最少代码实现同等功能，避免重复造轮子。
 - **边界（绝不妥协）**：精简 ≠ 砍掉**验证、错误处理、安全性、可访问性**。简洁是因为确实符合需求，而不是为了追求简洁牺牲质量；非平凡逻辑必须留下一个最小可运行验证。
 
 > ponytail 的 6 个 skill（`ponytail`、`ponytail-review`、`ponytail-audit`、`ponytail-debt`、`ponytail-gain`、`ponytail-help`）会随本包一起安装到 Claude Code 和 Codex；也支持官方插件方式：`/plugin marketplace add DietrichGebert/ponytail` + `/plugin install ponytail@ponytail`（可自动更新）。
+
 ## 2. 环境要求
 
-| 依赖 | 要求 | 说明 |
-|------|------|------|
-| Windows | 10 / 11 | 窗口桥目前只在 Windows 上验证过 |
-| Node.js | 18+（含 npm） | 运行 Codex CLI 和 Claude Code 需要 |
-| Git | 任意版本 | bash 运行 check.sh（Git Bash） |
-| Python | 3.12+ | 运行窗口桥（codex-bridge） |
-| uv | 最新 | 运行 codexmcp（可选，只用无声桥时需要） |
-| Codex 后端 | ChatGPT 订阅 **或** OpenAI 兼容 API | 本教程以 DeepSeek 为例 |
-| Claude Code | 2.x | 需支持 MCP 和 skills |
+| 依赖          | 要求                             | 说明                            |
+| ----------- | ------------------------------ | ----------------------------- |
+| Windows     | 10 / 11                        | 窗口桥目前只在 Windows 上验证过          |
+| Node.js     | 18+（含 npm）                     | 运行 Codex CLI 和 Claude Code 需要 |
+| Git         | 任意版本                           | bash 运行 check.sh（Git Bash）    |
+| Python      | 3.12+                          | 运行窗口桥（codex-bridge）           |
+| uv          | 最新                             | 运行 codexmcp（可选，只用无声桥时需要）      |
+| Codex 后端    | ChatGPT 订阅 **或** OpenAI 兼容 API | 本教程以 DeepSeek 为例              |
+| Claude Code | 2.x                            | 需支持 MCP 和 skills              |
 
----
+***
 
 ## 3. 快速开始（一键安装）
 
@@ -127,6 +136,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 脚本会自动：
+
 1. 检查依赖（node/npm/git/python），提示缺失项
 2. 安装 npm 版 Codex CLI（`@openai/codex`）——**必须用 npm 版**，Windows 商店版无法被子进程调用
 3. 部署窗口桥到 `~\claude-codex-bridge`，创建独立 venv 并安装依赖（固定 `mcp<2`，规避 mcp 2.0 兼容问题）
@@ -137,7 +147,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 
 > 建议运行前备份：`Copy-Item ~/.claude.json ~/.claude.json.bak`
 
----
+***
 
 ## 4. 手动安装步骤（不用脚本就按这个来）
 
@@ -221,7 +231,6 @@ Copy-Item .\skills\claude\codex-claude-collab-brain $HOME\.claude\skills\ -Recur
 Copy-Item .\skills\codex\codex-claude-collab-worker $HOME\.codex\skills\ -Recurse
 ```
 
-
 ponytail 6 个 skill（懒高级开发模式，配合协作 skill 使用）也一并安装：
 
 ```powershell
@@ -232,6 +241,7 @@ foreach ($ps in @("ponytail","ponytail-review","ponytail-audit","ponytail-debt",
 ```
 
 > 这 6 个 skill 让 Claude Code 派发前先做"精简审查"、Codex 实现时遵循"7 步梯子"（YAGNI → 复用 → stdlib → 原生 → 已装依赖 → 一行 → 最小实现），用最少代码实现同等功能。详见 `skills/claude/ponytail/SKILL.md`。
+
 ### 4.5b 配置全局 CLAUDE.md（重要，防止角色分工错乱）
 
 把 `config-examples/global-CLAUDE.md.example` 的内容粘贴/合并到 `~/.claude/CLAUDE.md`（或直接替换）。
@@ -267,7 +277,7 @@ trust_level = "trusted"
 claude mcp list   # 应看到 codex 和 codex-bridge 都 √ Connected
 ```
 
----
+***
 
 ## 5. 使用指南
 
@@ -279,55 +289,63 @@ claude mcp list   # 应看到 codex 和 codex-bridge 都 √ Connected
 
 ### 5.2 派活给 Codex（两种方式）
 
-| 想要的效果 | 说 |
-|-----------|-----|
-| 无声分析/方案/审查（不开窗口） | "用 codex 无声分析一下 X" |
+| 想要的效果             | 说                                  |
+| ----------------- | ---------------------------------- |
+| 无声分析/方案/审查（不开窗口）  | "用 codex 无声分析一下 X"                 |
 | 窗口模式（开窗口看到它干活，默认） | "让 codex 实现 X" / "开窗口让 codex 修复 X" |
 
 默认策略（skill 已配置）：**所有 Codex 任务默认窗口模式**；明确说"无声/不要开窗口"才走无声委托。
 
 ### 5.3 协作循环
 
+```mermaid
+graph TD
+    A["你提出需求"]
+    B["Claude Code：写 brief（派发前 ponytail 精简审查）"]
+    C["Claude Code：派 Codex（窗口 / 无声）"]
+    D["Codex：读 brief -> 写 plan -> 实现"]
+    E{"check.sh 通过？"}
+    F["Claude Code：审查 diff -> 写 review / backlog / decision-log"]
+    G{"审查通过？"}
+    H["你最终确认 -> 合入"]
+
+    A --> B --> C --> D --> E
+    E -->|"失败（最多 3 轮）"| D
+    E -->|"通过"| F --> G
+    G -->|"不通过，按 review 修复"| C
+    G -->|"通过"| H
 ```
-你提出需求
-  -> Claude Code：写 .ai/brief.md
-  -> Claude Code：派 Codex（窗口/无声）-> Codex 写 plan.md -> 实现 -> 跑 check.sh（失败则修复循环）
-  -> Claude Code：审查 diff -> 写 .ai/review.md / backlog.md / decision-log.md
-  -> 审查通过？ -> 你最终确认 -> 合入
-       +-- 不通过 -> 再派 Codex 按 review.md 修复 -> 循环
 
 > **派发前精简审查（ponytail）**：Claude Code 写 `.ai/brief.md` 时，先走 7 步梯子——YAGNI 跳过投机需求、代码库已有就复用（写进"复用清单"）、stdlib/平台/已装依赖优先、能一行就一行，最后才给最小实现方案。Codex 实现时同样遵循梯子，但**绝不精简**验证、错误处理、安全性、可访问性；非平凡逻辑留一个最小可运行验证（assert 自检或小测试），平凡一行不用测。
-```
 
----
-
+***
 
 ### 5.4 子代理委派（Codex 按任务类型自行调用子代理）
 
 Codex 拥有 `spawn_agent` 子代理能力（本机已装 67+ 个子代理，定义在 `~/.codex/agents/*.toml`）。执行 Claude Code 派发的任务时，Codex 会根据任务类型**自行调用**相关子代理辅助分析、规划、审查与构建修复：
 
-| 任务类型 | Codex 会调用的子代理示例 |
-|---------|------------------------|
-| 陌生代码库分析 | `code-explorer` |
-| 复杂功能 / 重构方案 | `planner`、`code-architect` |
-| Python 代码审查 | `python-reviewer` |
-| TypeScript / React / Vue | `typescript-reviewer`、`react-reviewer`、`vue-reviewer` |
-| 其他语言审查 | `go-reviewer`、`rust-reviewer`、`java-reviewer`、`cpp-reviewer` 等（按语言） |
-| 构建 / 类型错误 | `build-error-resolver`、`python-build-resolver`、`react-build-resolver` 等（按语言） |
-| 安全敏感改动 | `security-reviewer` |
-| 性能优化 | `performance-optimizer` |
+| 任务类型                     | Codex 会调用的子代理示例                                                              |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| 陌生代码库分析                  | `code-explorer`                                                              |
+| 复杂功能 / 重构方案              | `planner`、`code-architect`                                                   |
+| Python 代码审查              | `python-reviewer`                                                            |
+| TypeScript / React / Vue | `typescript-reviewer`、`react-reviewer`、`vue-reviewer`                        |
+| 其他语言审查                   | `go-reviewer`、`rust-reviewer`、`java-reviewer`、`cpp-reviewer` 等（按语言）          |
+| 构建 / 类型错误                | `build-error-resolver`、`python-build-resolver`、`react-build-resolver` 等（按语言） |
+| 安全敏感改动                   | `security-reviewer`                                                          |
+| 性能优化                     | `performance-optimizer`                                                      |
 
 - Claude Code 派活时会在 prompt 中提示 Codex"根据任务类型调用相关子代理"。
 - 子代理产出由 Codex 整合进代码与 `.ai/`，最终修改责任在 Codex；写权限互斥与"改后跑 check.sh"仍适用。
 - 并行并发上限在 `~/.codex/config.toml` 中配置：
 
-`	oml
-[agents]
+`	oml [agents]
 max_concurrent_threads_per_session = 8
 `
+
 ## 6. 常见问题（FAQ）
 
-**Q1：窗口桥报 `error: unexpected argument 'xxx' found`**
+**Q1：窗口桥报** **`error: unexpected argument 'xxx' found`**
 `wt new-tab` 对 prompt 二次拼接导致参数拆分。本包 bridge 已修复：默认改用 `CREATE_NEW_CONSOLE`（CreateProcess 直传命令行）+ prompt 清洗（换行->空格、双引号->中文引号）。仍遇到就重启 Claude Code 加载新代码。
 
 **Q2：窗口卡在 "Do you trust the contents of this directory?"**
@@ -336,7 +354,7 @@ max_concurrent_threads_per_session = 8
 **Q3：`No module named 'mcp.server.fastmcp'`**
 mcp 2.0 移除了 FastMCP。codexmcp 用 `--with "mcp<2"`，codex-bridge 用 `pip install "mcp>=1.0.0,<2"`。
 
-**Q4：`claude mcp add` 在 Windows 上报 unknown option**
+**Q4：`claude mcp add`** **在 Windows 上报 unknown option**
 `--` 后的 flag 被误解析。绕开：直接编辑 `~/.claude.json` 的 `mcpServers`（install.ps1 就是这么做的）。
 
 **Q5：窗口模式因非 ASCII 路径失败**
@@ -351,7 +369,7 @@ Windows 商店版 Codex 的 exe 受 ACL 限制，子进程无法调用（Access 
 **Q8：Codex 的默认模型能跟随 CC Switch 切换吗？**
 能。窗口桥默认 `codex_model_follow_codex_config=true`，每次调用 Codex 时自动读取 `~/.codex/config.toml` 的顶层 `model`（CC Switch 切换 provider 时会重写它），所以**在 CC Switch 里切换模型即可**，无需改 `~/.ai-bridge/config.json`。想固定模型就设环境变量 `CCB_FOLLOW_CODEX_CONFIG=0` + `CCB_CODEX_MODEL=xxx`（旧方式仍可用）。
 
----
+***
 
 ## 7. 目录说明
 
@@ -379,6 +397,5 @@ codex-claude-collab-pack/
 - [ponytail](https://github.com/DietrichGebert/ponytail) — 懒高级开发模式：YAGNI / stdlib-first / 最小实现（MIT）
 - [CC Switch](https://github.com/farion1231/cc-switch) — 可选：Claude Code / Codex 多供应商切换工具
 
----
+***
 
-*生成时间：2026-08-07 · 适用于 Claude Code 2.x + Codex CLI 0.14x*
