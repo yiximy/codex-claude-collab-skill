@@ -50,7 +50,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 
 - 本仓库**不含任何 API Key / Token / 密码**；`config-examples/` 中均为占位符（如 `你的用户名`、`你的项目路径`）。
 - 请勿提交 `~/.claude.json`、`~/.codex/auth.json`、`~/.ai-bridge/config.json` 等含真实凭据的文件（已在 `.gitignore` 排除）。
-- 推送前已做敏感信息扫描；建议在 GitHub 仓库启用 **Secret scanning / Push protection**。
+- 推送前请做敏感信息扫描；
 
 ## 📚 详细文档
 
@@ -79,10 +79,10 @@ graph TD
 
 **两个 MCP 桥（可并存，按需选用）：**
 
-| 桥                               | 模式   | 特点                                                                         | 适用                 |
-| ------------------------------- | ---- | -------------------------------------------------------------------------- | ------------------ |
-| **codexmcp**（GuDaStudio）        | 无声委托 | 一次性提交 -> 等待 -> 拿回 JSON 结果；不开窗口；支持 `SESSION_ID` 多轮续接                        | 出方案、审查、生成 diff、短任务 |
-| **codex-bridge**（uuz495，本包含修复版） | 窗口模式 | 弹出真实终端窗口显示 Codex 的 TUI，你能实时看到它干活；Claude 用 `peek_codex`/`wait_for_codex` 追踪 | 实际改代码、跑长任务、想监督     |
+| 桥                               | 模式   | 特点                                                                        | 适用                 |
+| ------------------------------- | ---- | ------------------------------------------------------------------------- | ------------------ |
+| **codexmcp**（GuDaStudio）        | 无声委托 | 一次性提交 -> 等待 -> 拿回 JSON 结果；不开窗口；支持`SESSION_ID` 多轮续接                        | 出方案、审查、生成 diff、短任务 |
+| **codex-bridge**（uuz495，本包含修复版） | 窗口模式 | 弹出真实终端窗口显示 Codex 的 TUI，你能实时看到它干活；Claude 用`peek_codex`/`wait_for_codex` 追踪 | 实际改代码、跑长任务、想监督     |
 
 **协作文件约定（每个项目内）：**
 
@@ -115,15 +115,15 @@ project/
 
 ## 2. 环境要求
 
-| 依赖          | 要求                             | 说明                            |
-| ----------- | ------------------------------ | ----------------------------- |
-| Windows     | 10 / 11                        | 窗口桥目前只在 Windows 上验证过          |
-| Node.js     | 18+（含 npm）                     | 运行 Codex CLI 和 Claude Code 需要 |
-| Git         | 任意版本                           | bash 运行 check.sh（Git Bash）    |
-| Python      | 3.12+                          | 运行窗口桥（codex-bridge）           |
-| uv          | 最新                             | 运行 codexmcp（可选，只用无声桥时需要）      |
-| Codex 后端    | ChatGPT 订阅 **或** OpenAI 兼容 API | 本教程以 DeepSeek 为例              |
-| Claude Code | 2.x                            | 需支持 MCP 和 skills              |
+| 依赖          | 要求                            | 说明                            |
+| ----------- | ----------------------------- | ----------------------------- |
+| Windows     | 10 / 11                       | 窗口桥目前只在 Windows 上验证过          |
+| Node.js     | 18+（含 npm）                    | 运行 Codex CLI 和 Claude Code 需要 |
+| Git         | 任意版本                          | bash 运行 check.sh（Git Bash）    |
+| Python      | 3.12+                         | 运行窗口桥（codex-bridge）           |
+| uv          | 最新版本                          | 运行 codexmcp（可选，只用无声桥时需要）      |
+| Codex       | ChatGPT 订阅**或** OpenAI 兼容 API | 本教程以 DeepSeek 为例              |
+| Claude Code | 2.x                           | 需支持 MCP 和 skills              |
 
 ***
 
@@ -261,7 +261,7 @@ New-Item -ItemType Junction -Path C:\codex-workspace -Target "D:\中文项目路
 `~/.ai-bridge/config.json` 中加：
 
 ```json
-"cwd_remaps": [["D:\中文项目路径", "C:\codex-workspace"]]
+"cwd_remaps": [["D:\\中文项目路径", "C:\\codex-workspace"]]
 ```
 
 `~/.codex/config.toml` 中加信任：
@@ -305,7 +305,7 @@ graph TD
     C["Claude Code：<br>派 Codex（窗口 / 无声）"]
     D["Codex：<br>读 brief -> 写 plan -> 实现"]
     E{"check.sh 通过？"}
-    F["Claude Code：<br>审查 diff -> 写 review / backlog / decision-log"]
+    F["Claude Code：<br>审查 diff -> 写 review / backlog / <br>decision-log"]
     G{"审查通过？"}
     H["你最终确认 -> 合入"]
 
@@ -322,7 +322,7 @@ graph TD
 
 ### 5.4 子代理委派（Codex 按任务类型自行调用子代理）
 
-Codex 拥有 `spawn_agent` 子代理能力（本机已装 67+ 个子代理，定义在 `~/.codex/agents/*.toml`）。执行 Claude Code 派发的任务时，Codex 会根据任务类型**自行调用**相关子代理辅助分析、规划、审查与构建修复：
+Codex 拥有 `spawn_agent` 子代理能力。执行 Claude Code 派发的任务时，Codex 会根据任务类型**自行调用**相关子代理辅助分析、规划、审查与构建修复：
 
 | 任务类型                     | Codex 会调用的子代理示例                                                              |
 | ------------------------ | ---------------------------------------------------------------------------- |
@@ -339,34 +339,40 @@ Codex 拥有 `spawn_agent` 子代理能力（本机已装 67+ 个子代理，定
 - 子代理产出由 Codex 整合进代码与 `.ai/`，最终修改责任在 Codex；写权限互斥与"改后跑 check.sh"仍适用。
 - 并行并发上限在 `~/.codex/config.toml` 中配置：
 
-`	oml [agents]
-max_concurrent_threads_per_session = 8
-`
+`	oml [agents] max_concurrent_threads_per_session = 8 ` &#x20;
 
 ## 6. 常见问题（FAQ）
 
 **Q1：窗口桥报** **`error: unexpected argument 'xxx' found`**
+
 `wt new-tab` 对 prompt 二次拼接导致参数拆分。本包 bridge 已修复：默认改用 `CREATE_NEW_CONSOLE`（CreateProcess 直传命令行）+ prompt 清洗（换行->空格、双引号->中文引号）。仍遇到就重启 Claude Code 加载新代码。
 
 **Q2：窗口卡在 "Do you trust the contents of this directory?"**
+
 该目录不在 config.toml 的 `[projects."路径"] trust_level = "trusted"` 中。按回车选 **1. Yes, continue** 一次即可，或手动加 trust（见 4.6）。Codex App/CC Switch 重写 config.toml 时可能覆盖 trust，需要时重新加。
 
 **Q3：`No module named 'mcp.server.fastmcp'`**
+
 mcp 2.0 移除了 FastMCP。codexmcp 用 `--with "mcp<2"`，codex-bridge 用 `pip install "mcp>=1.0.0,<2"`。
 
 **Q4：`claude mcp add`** **在 Windows 上报 unknown option**
+
 `--` 后的 flag 被误解析。绕开：直接编辑 `~/.claude.json` 的 `mcpServers`（install.ps1 就是这么做的）。
 
 **Q5：窗口模式因非 ASCII 路径失败**
+
 见 4.6，建 junction + `cwd_remaps`。
 
 **Q6：为什么必须用 npm 版 Codex CLI？**
+
 Windows 商店版 Codex 的 exe 受 ACL 限制，子进程无法调用（Access denied）。npm 版与商店版共用 `~/.codex/config.toml` 和 `auth.json`。
 
 **Q7：想用 ChatGPT 订阅而不是 API？**
+
 跳过 4.2，改执行 `codex login`（Sign in with ChatGPT）。注意环境变量若有 `OPENAI_API_KEY`，Codex 会优先用它产生 API 计费。
 
 **Q8：Codex 的默认模型能跟随 CC Switch 切换吗？**
+
 能。窗口桥默认 `codex_model_follow_codex_config=true`，每次调用 Codex 时自动读取 `~/.codex/config.toml` 的顶层 `model`（CC Switch 切换 provider 时会重写它），所以**在 CC Switch 里切换模型即可**，无需改 `~/.ai-bridge/config.json`。想固定模型就设环境变量 `CCB_FOLLOW_CODEX_CONFIG=0` + `CCB_CODEX_MODEL=xxx`（旧方式仍可用）。
 
 ***
