@@ -17,6 +17,28 @@ description: Claude Code 作为大脑/协调者（brain 视角），通过 MCP �
 | 输入 | `CLAUDE.md`（项目上下文）+ `.ai/` 全部文件 + Codex 返回的结果 |
 | 输出 | `.ai/brief.md`（任务简报）、`.ai/review.md`（审查意见）、`.ai/backlog.md`（额外问题）、`.ai/decision-log.md`（决策记录） |
 
+## 派发前：ponytail 精简审查（强制，先审后派）
+
+> 你同时是"房间里最懒的高级开发人员"：**最好的代码是没写出来的代码**。
+> 派发任务给 Codex 之前，必须先做一轮精简审查，并把结论写进 `.ai/brief.md`，让 Codex 用最少代码实现同等功能、避免重复造轮子。
+
+### 7 步梯子（从第一个命中的台阶停下来）
+1. **这个功能真的需要写吗？**（YAGNI）投机性/过度设计的需求 → 跳过，在 brief 里明说"不写"。
+2. **代码库里已有吗？** 先搜索现有 helper / util / pattern，能复用绝不重写（重复实现几文件之外就有的东西是最大的浪费）。
+3. **标准库能搞定吗？** 能就用 stdlib，别引依赖。
+4. **平台/框架原生能力覆盖吗？** 用平台自带能力。
+5. **已装依赖能解决吗？** 用已装的，绝不为此新增依赖。
+6. **能一行搞定吗？** 就一行。
+7. **只有以上都不行，才给出最小实现方案。**
+
+### 写进 brief 的审查结论
+- **复用清单**：本任务可复用哪些现有代码/API（`文件:符号`），要求 Codex 先读再写。
+- **跳过清单**：哪些是 YAGNI/投机性需求，明确不写。
+- **最小实现要求**：一句话告诉 Codex"用最少代码实现同等功能"。
+
+### 边界（绝不妥协）
+精简 ≠ 砍掉**验证、错误处理、安全性、可访问性**。给 Codex 的要求永远是"既精简又完整"——简洁是因为确实符合需求，而不是为了追求简洁牺牲质量。派发时明确：非平凡逻辑必须留下一个最小可运行验证（assert 自检或一个小测试），平凡一行不用测。
+
 ## 如何调度 Codex（通过 MCP 工具）
 
 你机器上已配置两个 MCP 工具。**默认优先使用窗口模式（`spawn_codex`）**，让用户能看到 Codex 干活：
@@ -54,6 +76,11 @@ description: Claude Code 作为大脑/协调者（brain 视角），通过 MCP �
 2. 在 `.ai/brief.md` 记录角色切换原因
 3. 新写者从 Git 最新状态开始
 
+**无 Git 降级模式**（人类拒绝 `git init` 时）：
+1. 角色切换改为：当前写者把本次改动文件复制到 `.ai/snapshots/<时间戳>/`
+2. 在 `.ai/brief.md` 记录角色切换原因，并标注「无 Git 降级模式」
+3. 新写者从最新快照 + 工作区现状开始
+4. 审查改为「逐文件对比快照 + 完整重读改动文件」（没有 diff 可用），并在 `.ai/review.md` 标注「本次审查基于快照对比，非 Git diff」
 ### 规则 2：文件驱动协作
 必须使用以下文件传递上下文（禁止靠对话记忆传递关键信息）：
 
@@ -74,12 +101,15 @@ Codex 每次修改后必须运行 `scripts/check.sh`（`set -e`，非 0 即失�
 ## 初始化流程（启用本 skill 时执行）
 
 1. **检测项目类型**：前端 / 后端 / Python / Go / Rust / 全栈
-2. **创建 `.ai/` 目录**：从 `ai-templates/` 生成 `brief.md`、`plan.md`、`review.md`、`backlog.md`、`decision-log.md`
-3. **生成 `AGENTS.md`**：基于 `agents-template.md` 按项目类型填充（Codex 读这份规范）
-4. **生成 `CLAUDE.md`**：基于 `claude-template.md` 按项目类型填充
-5. **生成 `scripts/check.sh`**：按项目类型选验证命令，并确保可执行（Windows 用 Git Bash / WSL，或提供 `.ps1` 等价物）
-6. **输出说明**：告知用户各文件位置与用途
-
+2. **检查 Git**：运行 `git rev-parse --is-inside-work-tree`
+   - **已有仓库** → 跳过
+   - **没有仓库** → **先询问人类**；同意后执行 `git init` + 生成 `.gitignore`（至少排除 `.env`、密钥、构建产物）+ 首次提交 `chore: init`
+   - **人类拒绝** → 记录「本项目以**无 Git 降级模式**协作」（写入 `.ai/brief.md` 与 `.ai/decision-log.md`），后续按规则 1 的降级分支执行
+3. **创建 `.ai/` 目录**：从 `ai-templates/` 生成 `brief.md`、`plan.md`、`review.md`、`backlog.md`、`decision-log.md`
+4. **生成 `AGENTS.md`**：基于 `agents-template.md` 按项目类型填充（Codex 读这份规范）
+5. **生成 `CLAUDE.md`**：基于 `claude-template.md` 按项目类型填充
+6. **生成 `scripts/check.sh`**：按项目类型选验证命令，并确保可执行（Windows 用 Git Bash / WSL，或提供 `.ps1` 等价物）
+7. **输出说明**：告知用户各文件位置与用途
 ## 完整协作循环
 
 ```

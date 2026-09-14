@@ -115,15 +115,16 @@ project/
 
 ## 2. 环境要求
 
-| 依赖          | 要求                            | 说明                            |
-| ----------- | ----------------------------- | ----------------------------- |
-| Windows     | 10 / 11                       | 窗口桥目前只在 Windows 上验证过          |
-| Node.js     | 18+（含 npm）                    | 运行 Codex CLI 和 Claude Code 需要 |
-| Git         | 任意版本                          | bash 运行 check.sh（Git Bash）    |
-| Python      | 3.12+                         | 运行窗口桥（codex-bridge）           |
-| uv          | 最新版本                          | 运行 codexmcp（可选，只用无声桥时需要）      |
-| Codex       | ChatGPT 订阅**或** OpenAI 兼容 API | 本教程以 DeepSeek 为例              |
-| Claude Code | 2.x                           | 需支持 MCP 和 skills              |
+| 依赖          | 要求                            | 说明                              |
+| ----------- | ----------------------------- | ------------------------------- |
+| Windows     | 11                            | 窗口桥目前只在 Windows 11上验证过          |
+| Node.js     | 18+（含 npm）                    | 运行 Codex CLI 和 Claude Code 需要   |
+| Git         | 任意版本                          | bash 运行 check.sh（Git Bash）      |
+| Python      | 3.12+                         | 运行窗口桥（codex-bridge）             |
+| uv          | 最新版本                          | 运行 codexmcp（可选，只用无声桥时需要）        |
+| Codex       | ChatGPT 订阅**或** OpenAI 兼容 API | -                               |
+| Claude Code | 2.x                           | -                               |
+| CC Switch   | v3.19.2+                      | 用于给Claude Code与Codex接入第三方模型（可选） |
 
 ***
 
@@ -248,7 +249,7 @@ foreach ($ps in @("ponytail","ponytail-review","ponytail-audit","ponytail-debt",
 
 它定义了**角色分工**：Claude Code = 大脑/协调者（写 brief、派活、审查，**不直接改源代码**），Codex = 实现者（改代码、跑 check.sh）。并包含窗口/无声模式切换规则（默认窗口，可手动切换）。
 
-> 如果不配置这段，Claude Code 可能沿用旧的"自己写代码"习惯，导致与 skill 的"Codex 写、Claude 审"冲突（已踩过这个坑）。
+> 如果不配置这段，Claude Code 可能沿用旧的"自己写代码"习惯，导致与 skill 的"Codex 写、Claude 审"冲突。
 
 ### 4.6 中文/非 ASCII 路径（可选但强烈建议）
 
@@ -339,7 +340,7 @@ Codex 拥有 `spawn_agent` 子代理能力。执行 Claude Code 派发的任务�
 - 子代理产出由 Codex 整合进代码与 `.ai/`，最终修改责任在 Codex；写权限互斥与"改后跑 check.sh"仍适用。
 - 并行并发上限在 `~/.codex/config.toml` 中配置：
 
-`	oml [agents] max_concurrent_threads_per_session = 8 ` &#x20;
+`	oml [agents] max_concurrent_threads_per_session = 8 `     &#x20;
 
 ## 6. 常见问题（FAQ）
 
