@@ -22,3 +22,8 @@
 - Codex 拥有 spawn_agent 子代理能力，应按任务类型自行委派（见 AGENTS.md）。
 - 审查时确认：复杂/高风险任务 Codex 是否合理调用了子代理（如代码审查、构建修复、安全审查）；简单任务不必强求。
 - 子代理产出由 Codex 整合并负责，最终审查仍以你读到的 diff 为准。
+## Git 提交者身份
+- 本项目提交者：{{COMMIT_IDENTITY}}
+- 所有提交使用**仓库级**配置（`git config user.name` / `user.email`，不带 `--global`），不影响其他项目
+- 不要临时传 `-c user.name=...` / `-c user.email=...` 覆盖既定身份
+- 如需变更提交者：重新执行仓库级 `git config`，并同步更新本节与 `.ai/decision-log.md`

@@ -105,6 +105,7 @@ description: Codex 作为实现者（worker 视角），通过 MCP（codex / cod
 2. 在 `.ai/brief.md` 记录角色切换原因
 3. 新写者从 Git 最新状态开始
 
+> **提交身份统一**：提交一律使用项目初始化时确认的**仓库级身份**（`git config user.name` / `user.email`，不含 `--global`）。不要自行传 `-c user.name=...` 覆盖，也不要依赖全局默认值。
 **无 Git 降级模式**（项目未初始化 Git，且人类拒绝 `git init` 时）：
 1. 角色切换改为：把本次改动文件复制到 `.ai/snapshots/<时间戳>/`
 2. 在 `.ai/brief.md` 记录角色切换原因，并标注「无 Git 降级模式」

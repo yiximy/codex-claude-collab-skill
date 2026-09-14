@@ -76,6 +76,7 @@ description: Claude Code 作为大脑/协调者（brain 视角），通过 MCP �
 2. 在 `.ai/brief.md` 记录角色切换原因
 3. 新写者从 Git 最新状态开始
 
+> **提交身份统一**：所有提交一律使用**初始化时确认的仓库级身份**（见初始化流程第 3 步）。不要临时用 `git -c user.name=...` 覆盖，也不要假设全局默认值——否则提交记录里的作者会在工具间来回跳动。
 **无 Git 降级模式**（人类拒绝 `git init` 时）：
 1. 角色切换改为：当前写者把本次改动文件复制到 `.ai/snapshots/<时间戳>/`
 2. 在 `.ai/brief.md` 记录角色切换原因，并标注「无 Git 降级模式」
@@ -103,13 +104,25 @@ Codex 每次修改后必须运行 `scripts/check.sh`（`set -e`，非 0 即失�
 1. **检测项目类型**：前端 / 后端 / Python / Go / Rust / 全栈
 2. **检查 Git**：运行 `git rev-parse --is-inside-work-tree`
    - **已有仓库** → 跳过
-   - **没有仓库** → **先询问人类**；同意后执行 `git init` + 生成 `.gitignore`（至少排除 `.env`、密钥、构建产物）+ 首次提交 `chore: init`
-   - **人类拒绝** → 记录「本项目以**无 Git 降级模式**协作」（写入 `.ai/brief.md` 与 `.ai/decision-log.md`），后续按规则 1 的降级分支执行
-3. **创建 `.ai/` 目录**：从 `ai-templates/` 生成 `brief.md`、`plan.md`、`review.md`、`backlog.md`、`decision-log.md`
-4. **生成 `AGENTS.md`**：基于 `agents-template.md` 按项目类型填充（Codex 读这份规范）
-5. **生成 `CLAUDE.md`**：基于 `claude-template.md` 按项目类型填充
-6. **生成 `scripts/check.sh`**：按项目类型选验证命令，并确保可执行（Windows 用 Git Bash / WSL，或提供 `.ps1` 等价物）
-7. **输出说明**：告知用户各文件位置与用途
+   - **没有仓库** → **先询问人类**；同意后执行 `git init` + 生成 `.gitignore`（至少排除 `.env`、密钥、构建产物）
+   - **人类拒绝** → 记录「本项目以**无 Git 降级模式**协作」（写入 `.ai/brief.md` 与 `.ai/decision-log.md`），后续按规则 1 的降级分支执行，并跳过第 3、8 步
+3. **确认 Git 提交者身份**（使用 Git 时必做，**必须询问人类**，三选一）：
+
+   | 选项 | 含义 | 落地命令（**仓库级**，不带 `--global`） |
+   |------|------|--------------------------------------|
+   | **默认（Claude）** | 提交记录显示 `Claude Code`，不关联任何 Git 账号 | `git config user.name "Claude Code"` + `git config user.email "claude@local"` |
+   | **本地 git 全局配置** | 沿用 `git config --global` 里的真实身份（提交正确归属你的 GitHub/Gitee 账号） | `git config --unset user.name` + `git config --unset user.email`（回落到全局） |
+   | **自定义** | 由人类指定 name / email | `git config user.name "<name>"` + `git config user.email "<email>"` |
+
+   一律只写**仓库级**配置，不影响你其他项目；选定后把结论记入 `.ai/decision-log.md`（记 name + email + 选择原因）。
+   > ⚠️ 邮箱提醒：若该仓库要推送到 GitHub，而账号开启了「阻止暴露私有邮箱」（报错 GH007），请改用 GitHub 的 noreply 邮箱 `<GitHubID>+<username>@users.noreply.github.com`（例：`149991911+yiximy@users.noreply.github.com`）。
+   > 该身份**只在初始化时询问一次**；此后所有提交（Claude 与 Codex）都沿用，不再重复询问。
+4. **创建 `.ai/` 目录**：从 `ai-templates/` 生成 `brief.md`、`plan.md`、`review.md`、`backlog.md`、`decision-log.md`
+5. **生成 `AGENTS.md`**：基于 `agents-template.md` 按项目类型填充（Codex 读这份规范），其中 `{{COMMIT_IDENTITY}}` 填本次确认的提交者身份
+6. **生成 `CLAUDE.md`**：基于 `claude-template.md` 按项目类型填充，同样填入 `{{COMMIT_IDENTITY}}`
+7. **生成 `scripts/check.sh`**：按项目类型选验证命令，并确保可执行（Windows 用 Git Bash / WSL，或提供 `.ps1` 等价物）
+8. **首次提交**（仅当第 2 步新建了仓库）：用第 3 步确认的身份执行 `git add -A && git commit -m "chore: init"`，一次提交包含 `.gitignore` + `.ai/` + `AGENTS.md` + `CLAUDE.md` + `scripts/check.sh`
+9. **输出说明**：告知用户各文件位置与用途，并**明确回报本次选定的 Git 提交者身份**
 ## 完整协作循环
 
 ```

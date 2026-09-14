@@ -39,3 +39,8 @@
 - 架构决策记录到 .ai/decision-log.md
 - 角色切换：提交当前修改 → 在 .ai/brief.md 记录 → 从 Git 最新状态开始
 - **无 Git 降级模式**（项目未初始化 Git 且人类拒绝 git init）：角色切换改为把改动文件复制到 .ai/snapshots/<时间戳>/，接手方从最新快照 + 工作区现状开始；无 diff 可看时按「本次改动文件清单 + 每个文件改了什么」交付（写进 .ai/plan.md），审查方逐文件重读
+## Git 提交者身份
+- 本项目提交者：{{COMMIT_IDENTITY}}
+- 所有提交使用**仓库级**配置（`git config user.name` / `user.email`，不带 `--global`），不影响其他项目
+- 不要临时传 `-c user.name=...` / `-c user.email=...` 覆盖既定身份
+- 如需变更提交者：重新执行仓库级 `git config`，并同步更新本节与 `.ai/decision-log.md`
