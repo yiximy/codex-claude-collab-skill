@@ -13,6 +13,7 @@
 - 实现修改：修改源代码
 - 每次修改后：运行 scripts/check.sh
 - 修复循环：check.sh 失败 → 修复 → 重跑，直到全部通过（最多 3 轮，超出请求人类介入）
+- 实现完成且 check.sh 通过后：**提交本次改动**（`git add -A && git commit -m "<type>: <任务摘要>"`），并把 commit hash 写入 .ai/plan.md（提交前无需等人类提醒）
 
 ## Subagents（子代理委派）
 - 你有 spawn_agent 工具，**可根据任务类型自行调用相关子代理**辅助分析、规划、审查与构建修复。

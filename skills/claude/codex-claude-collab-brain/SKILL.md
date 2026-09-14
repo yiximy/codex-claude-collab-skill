@@ -130,11 +130,28 @@ Codex 每次修改后必须运行 `scripts/check.sh`（`set -e`，非 0 即失�
   → 你：写 .ai/brief.md（目标/验收标准）
   → 你：通过 MCP 派任务给 Codex（prompt 引用 .ai/brief.md）
   → Codex：读 AGENTS.md + brief.md → 写 .ai/plan.md → 实现 → 跑 scripts/check.sh（失败则修复循环）
-  → 你：读 diff / Codex 结果 → 写 .ai/review.md（通过/不通过/有条件通过）→ 追加 backlog.md → 记录 decision-log.md
-  → 通过 → 人类最终确认 → 合入主分支
-       └ 不通过 → 你再次派 Codex 按 review.md 修复 → 循环
+  → Codex：提交实现（git add -A && git commit），commit hash 写入 .ai/plan.md
+  → 你：读 Codex 的 commit diff → 写 .ai/review.md（通过/不通过/有条件通过）→ 追加 backlog.md → 记录 decision-log.md
+  → 通过 → 人类最终确认 → 你提交 .ai/ 文档 → 回报 commit hash + 询问是否推送
+       └ 不通过 → 你再次派 Codex 按 review.md 修复 → Codex 提交修复 → 循环
 ```
 
+## 任务收尾清单（Definition of Done）
+
+**触发条件**：本次任务产生了文件变更（源代码或 `.ai/` 文档）。纯分析 / 咨询类任务无变更 → 跳过本清单。
+
+**每个有变更的任务结束时，必须逐项核对，缺一不可：**
+
+- [ ] **1. 实现已提交**：Codex 实现完成且 `scripts/check.sh` 通过后，应已执行 `git add -A && git commit -m "<type>: <任务摘要>"`，并把 commit hash 写入 `.ai/plan.md`。**若 Codex 未提交 → 由你补提交**（不得把"工作区已改好但未提交"当作任务完成）
+- [ ] **2. 审查文档已提交**：写完 `.ai/review.md` / `backlog.md` / `decision-log.md` 后，执行 `git add .ai/ && git commit -m "chore(ai): review <任务摘要>"`
+- [ ] **3. 仓库干净**：`git status` 无未提交改动（被 `.gitignore` 忽略的文件不算）
+- [ ] **4. 回报人类**：给出 `git log --oneline -2` 的 commit hash，并明确说明"是否需要推送"
+
+> **commit 与 push 是两件事**：
+> - **提交（commit）是默认动作** —— 每个有变更的任务结束必做，**不需要人类提醒**
+> - **推送（push）需人类确认** —— 不要擅自 push
+
+**无 Git 降级模式**：本项目未使用 Git → 跳过第 1-3 项，改为把改动文件复制到 `.ai/snapshots/<时间戳>/`，并在交付报告中列出「改动文件清单 + 每个文件改了什么」。
 ## 模板引用
 
 - `agents-template.md` — 生成 Codex 的 `AGENTS.md`
@@ -149,3 +166,5 @@ Codex 每次修改后必须运行 `scripts/check.sh`（`set -e`，非 0 即失�
 - 靠对话记忆传递关键信息（必须写 `.ai/`）
 - 让 Codex 改完不跑 check.sh 就结束
 - 把 CLAUDE.md 当安全策略用（强制限制用 hook）
+- **任务完成却不提交** —— 等人类提醒才 git commit 属于流程失败；commit 是默认动作
+- 擅自 git push —— 推送必须经人类确认

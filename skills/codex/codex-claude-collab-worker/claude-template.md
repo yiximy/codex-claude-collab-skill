@@ -12,6 +12,7 @@
 - 分析代码 diff，输出审查意见到 .ai/review.md（**无 Git 时**改为逐文件对比 .ai/snapshots/ 快照 + 完整重读改动文件，并在审查结论中标注「基于快照对比」）
 - 发现额外问题追加到 .ai/backlog.md
 - 记录架构决策到 .ai/decision-log.md
+- **任务收尾（有文件变更时必做）**：确认实现已提交 → 提交 .ai/ 文档（`git add .ai/ && git commit -m "chore(ai): review <任务>"`）→ 确认 git status 干净 → 回报 commit hash 并询问是否需要推送（**commit 默认做，push 需人类确认**）
 
 ## Verification
 - 审查时关注：check.sh 是否覆盖了所有关键路径

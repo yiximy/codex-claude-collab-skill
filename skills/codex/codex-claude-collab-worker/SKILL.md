@@ -26,7 +26,8 @@ description: Codex 作为实现者（worker 视角），通过 MCP（codex / cod
   → （复杂任务）可先派子代理 code-explorer/planner 辅助分析 → 写 .ai/plan.md
   → 实现修改源代码
   → 每次修改后运行 scripts/check.sh（失败 → 修复 → 重跑，最多 3 轮，超出请人类介入）
-  → 将结果报告给 Claude Code，等待审查意见（.ai/review.md）
+  → 提交本次改动：git add -A && git commit -m "<type>: <任务摘要>"（使用初始化时确认的仓库级提交身份），并把 commit hash 写入 .ai/plan.md
+  → 将结果（含 commit hash）报告给 Claude Code，等待审查意见（.ai/review.md）
 ```
 
 ## 实现时：ponytail 梯子（用最少代码实现同等功能）
@@ -133,3 +134,5 @@ description: Codex 作为实现者（worker 视角），通过 MCP（codex / cod
 - 把简单任务也强行派子代理（浪费 token）
 - 同一文件同时派多个写型子代理（写冲突）
 - 把 CLAUDE.md 当安全策略用（强制限制用 hook）
+- **实现完成却不提交** —— 等 Claude Code 提醒才 git commit 属于流程失败；提交是交付物的一部分
+- 擅自 git push —— 推送必须经人类确认
